@@ -2,8 +2,7 @@ import { Router, Request } from "express";
 import { Room, rooms } from "../game/rooms.js";
 import { NotFoundException } from "../exceptions/notFoundException.js";
 import RoomDto from "../dto/roomDto.js";
-import { GameStatus, QuestType } from "../game/enums/index.js";
-import { Quest } from "../game/quest.js";
+import { GameStatus } from "../game/enums/index.js";
 
 const router = Router();
 

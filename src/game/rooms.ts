@@ -53,10 +53,6 @@ export class Room {
     return this.turns[this.currentTurn];
   }
 
-  private getNextTurn() {
-    return this.turns[this.currentTurn + 1];
-  }
-
   getNextPlayer(id: string) {
     const index = this.players.findIndex((p) => p.id === id);
     if (index + 1 === this.players.length) {
