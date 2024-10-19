@@ -11,7 +11,10 @@ export const sessionMiddleware: any = (
     req.session = {};
     const token = req.cookies.token;
 
-    if (req.originalUrl === "/authentication/login") {
+    if (
+      req.originalUrl === "/" ||
+      req.originalUrl === "/authentication/login"
+    ) {
       return next();
     }
 
