@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "npm install && tsc",
     "start": "node out/app.js"
   },
   "dependencies": {
