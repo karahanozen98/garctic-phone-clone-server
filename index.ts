@@ -12,6 +12,8 @@ import bodyParser from "body-parser";
 import { ioMiddleware } from "./middlewares/ioMiddleware.js";
 import { connectMongo } from "./helpers/mongo.js";
 
+console.log("APP INIT");
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: process.env.CLIENT_URL } });
