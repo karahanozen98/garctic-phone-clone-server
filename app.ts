@@ -32,10 +32,10 @@ io.on("connection", (socket: Socket) => {
 });
 
 app.use(cookies());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "50mb" }));
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );

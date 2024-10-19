@@ -91,7 +91,7 @@ router.put("/:id/join", (req: any, res, next) => {
     const user = req.session?.user;
     if (room.players.find((u) => u.id === user.id) == null) {
       room.players.push(user);
-      req.io.emit("room-update", { room: new RoomDto(room) });
+      req.io.emit(`room-update-${req.params.id}`, { room: new RoomDto(room) });
     }
 
     res.json();
@@ -119,7 +119,7 @@ router.put("/:id/start", (req: any, res, next) => {
 
     room.isStarted = true;
     room.status = GameStatus.WaitingForInitialSentences;
-    req.io.emit("room-update", { room: new RoomDto(room) });
+    req.io.emit(`room-update-${req.params.id}`, { room: new RoomDto(room) });
     res.json();
   } catch (error) {
     next(error);
@@ -148,7 +148,7 @@ router.put("/:id/sentence", (req: any, res, next) => {
     // all users entered their quests change room state
     if (room.isAllQuestsReady()) {
       room.completeCurrentTurn();
-      req.io.emit("room-update", { room: new RoomDto(room) });
+      req.io.emit(`room-update-${req.params.id}`, { room: new RoomDto(room) });
     }
 
     res.json();
@@ -190,7 +190,7 @@ router.put("/:id/drawing", (req: any, res, next) => {
     if (room.isAllQuestsCompleted()) {
       // all users completed their drawing quests
       room.completeCurrentTurn();
-      req.io.emit("room-update", { room: new RoomDto(room) });
+      req.io.emit(`room-update-${req.params.id}`, { room: new RoomDto(room) });
     }
 
     res.json();

@@ -1,6 +1,7 @@
 import { NextFunction, Router } from "express";
 import { User } from "../model/user.js";
 import jwt from "jsonwebtoken";
+import { AuthorizationException } from "../exceptions/authorizationException.js";
 
 const router = Router();
 
@@ -28,8 +29,8 @@ router.post("/login", async (req, res, next) => {
 
     res.cookie("token", token, {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      secure: false,
-      httpOnly: false,
+      secure: process.env.ENV === "Production",
+      httpOnly: process.env.ENV === "Production",
       path: "/",
       sameSite: "lax",
     });
@@ -42,9 +43,20 @@ router.post("/login", async (req, res, next) => {
 router.get("/me", (req: any, res: any, next: NextFunction) => {
   try {
     if (!req.session.user) {
-      throw new Error("You are not authorized");
+      throw new AuthorizationException("You are not authorized");
     }
     res.json(req.session.user);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/logout", async (req, res, next) => {
+  try {
+    res.cookie("token", "", {
+      maxAge: 0,
+    });
+    res.json();
   } catch (error) {
     next(error);
   }
