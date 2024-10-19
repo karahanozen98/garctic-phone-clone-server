@@ -2,7 +2,7 @@
   "type": "module",
   "scripts": {
     "build": "npm install && tsc",
-    "start": "node out/app.js"
+    "start": "node out/index.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
