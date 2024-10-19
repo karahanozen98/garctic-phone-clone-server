@@ -14,7 +14,7 @@ import { connectMongo } from "./helpers/mongo.js";
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server, { cors: { origin: process.env.CLIENT_URL } });
 
 connectMongo();
 io.on("connection", (socket: Socket) => {
@@ -50,6 +50,6 @@ app.use("/authentication", authenticationRouter);
 app.use("/room", roomRouter);
 app.use(exceptionMiddleware);
 
-server.listen(4000, () => {
-  console.log("Listening on *:4000");
+server.listen(process.env.PORT, () => {
+  console.log(`Listening on port ${process.env.PORT}`);
 });
