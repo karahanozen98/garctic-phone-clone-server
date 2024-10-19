@@ -2,8 +2,8 @@
   "type": "module",
   "scripts": {
     "build": "npm install && tsc",
-    "start": "node out/index.js",
-    "dev": "node out/index.js"
+    "start": "node out/api/index.js",
+    "dev": "node out/api/index.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
