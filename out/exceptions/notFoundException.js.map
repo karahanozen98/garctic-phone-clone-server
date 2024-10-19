@@ -1,0 +1,1 @@
+{"version":3,"file":"notFoundException.js","sourceRoot":"","sources":["../../src/exceptions/notFoundException.ts"],"names":[],"mappings":"AAAA,MAAM,OAAO,iBAAkB,SAAQ,KAAK;IAG1C,YAAY,OAAe;QACzB,KAAK,CAAC,OAAO,CAAC,CAAC;QACf,IAAI,CAAC,UAAU,GAAG,GAAG,CAAC;IACxB,CAAC;CACF"}
