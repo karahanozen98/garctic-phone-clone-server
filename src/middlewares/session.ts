@@ -2,7 +2,7 @@ import { Response, NextFunction, Request } from "express";
 import jwt from "jsonwebtoken";
 import { AuthorizationException } from "../exceptions/authorizationException.js";
 
-export const sessionMiddleware: any = (
+export const session: any = (
   req: Request & { session: any },
   res: Response,
   next: NextFunction
@@ -19,7 +19,7 @@ export const sessionMiddleware: any = (
     }
 
     if (!token) {
-      throw new AuthorizationException("You are not authorized");
+      throw new AuthorizationException();
     }
 
     try {
@@ -32,7 +32,7 @@ export const sessionMiddleware: any = (
       }
     } catch (error) {
       res.cookie("token", "", { maxAge: 0 });
-      throw new AuthorizationException("You are not authorized");
+      throw new AuthorizationException();
     }
 
     return next();

@@ -2,6 +2,7 @@ import { NextFunction, Router } from "express";
 import { User } from "../model/user.js";
 import jwt from "jsonwebtoken";
 import { AuthorizationException } from "../exceptions/authorizationException.js";
+import { authorize } from "../middlewares/authorize.js";
 
 const router = Router();
 
@@ -62,6 +63,21 @@ router.post("/logout", async (req, res, next) => {
       maxAge: 0,
     });
     res.json();
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/createUser", authorize(), async (req, res, next) => {
+  try {
+    var user = new User({
+      email: req.body.email,
+      username: req.body.username,
+      password: req.body.password,
+    });
+
+    user.save();
+    res.json("Ok");
   } catch (error) {
     next(error);
   }

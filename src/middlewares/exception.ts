@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-export const exceptionMiddleware = (
+export const exception = (
   error: any,
   req: Request,
   res: Response,

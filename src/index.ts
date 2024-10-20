@@ -6,10 +6,10 @@ import cookies from "cookie-parser";
 import { Server, Socket } from "socket.io";
 import authenticationRouter from "./routes/authentication.js";
 import roomRouter from "./routes/room.js";
-import { exceptionMiddleware } from "./middlewares/exceptionMiddleware.js";
-import { sessionMiddleware } from "./middlewares/sessionMiddleware.js";
+import { exception } from "./middlewares/exception.js";
+import { session } from "./middlewares/session.js";
 import bodyParser from "body-parser";
-import { ioMiddleware } from "./middlewares/ioMiddleware.js";
+import { socketIO } from "./middlewares/socketIO.js";
 import { connectMongo } from "./helpers/mongo.js";
 
 const app = express();
@@ -41,8 +41,8 @@ app.use(
     credentials: true,
   })
 );
-app.use(sessionMiddleware);
-app.use(ioMiddleware(io));
+app.use(session);
+app.use(socketIO(io));
 
 app.get("/", (req, res) => {
   res.json("Healthy");
@@ -50,7 +50,7 @@ app.get("/", (req, res) => {
 
 app.use("/authentication", authenticationRouter);
 app.use("/room", roomRouter);
-app.use(exceptionMiddleware);
+app.use(exception);
 
 server.listen(process.env.PORT, () => {
   console.log(`Listening on port ${process.env.PORT}`);
