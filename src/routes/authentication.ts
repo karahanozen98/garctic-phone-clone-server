@@ -32,7 +32,7 @@ router.post("/login", async (req, res, next) => {
       secure: process.env.ENV === "Production",
       httpOnly: process.env.ENV === "Production",
       path: "/",
-      sameSite: "lax",
+      sameSite: "none",
     });
     res.json({ id: user.id, username: user.username, email: user.email });
   } catch (error) {
