@@ -13,7 +13,9 @@ import { ioMiddleware } from "./middlewares/ioMiddleware.js";
 import { connectMongo } from "./helpers/mongo.js";
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: process.env.CLIENT_URL } });
+const io = new Server(server, {
+    cors: { origin: process.env.CLIENT_URL, credentials: true },
+});
 connectMongo();
 io.on("connection", (socket) => {
     console.log("A user is connected");
