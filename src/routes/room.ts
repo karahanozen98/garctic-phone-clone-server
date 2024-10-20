@@ -3,6 +3,7 @@ import { Room, rooms } from "../game/rooms.js";
 import { NotFoundException } from "../exceptions/notFoundException.js";
 import RoomDto from "../dto/roomDto.js";
 import { GameStatus } from "../game/enums/index.js";
+import { AuthorizationException } from "../exceptions/authorizationException.js";
 
 const router = Router();
 
@@ -38,8 +39,14 @@ router.get("/:id", (req: Request, res, next) => {
   }
 });
 
-router.get("/:id/detailed", (req: Request, res, next) => {
+router.get("/:id/detailed", (req: any, res, next) => {
   try {
+    if (req.session?.user?.role !== "admin") {
+      throw new AuthorizationException(
+        "You are not authorized to perform this action"
+      );
+    }
+
     const room = rooms.find((room) => room.id.toString() === req.params.id);
 
     if (!room) {
@@ -47,6 +54,20 @@ router.get("/:id/detailed", (req: Request, res, next) => {
     }
 
     res.json(room);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/all", (req: any, res, next) => {
+  try {
+    if (req.session?.user?.role !== "admin") {
+      throw new AuthorizationException(
+        "You are not authorized to perform this action"
+      );
+    }
+    rooms.length = 0;
+    res.json("Ok");
   } catch (error) {
     next(error);
   }
