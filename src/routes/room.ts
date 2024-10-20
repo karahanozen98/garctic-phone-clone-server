@@ -2,7 +2,7 @@ import { Router, Request } from "express";
 import { Room, rooms } from "../game/rooms.js";
 import { NotFoundException } from "../exceptions/notFoundException.js";
 import RoomDto from "../dto/roomDto.js";
-import { GameStatus } from "../game/enums/index.js";
+import { GameStatus, QuestType } from "../game/enums/index.js";
 import { authorize } from "../middlewares/authorize.js";
 
 const router = Router();
@@ -152,7 +152,7 @@ router.put("/:id/sentence", (req: any, res, next) => {
       throw new Error("Game does not expect for sentences");
     }
 
-    room.createNewDrawingQuest(user, req.body.sentence);
+    room.createNewQuest(QuestType.Drawing, user, req.body.sentence);
 
     // all users entered their quests change room state
     if (room.isAllQuestsReady()) {
@@ -193,7 +193,7 @@ router.put("/:id/drawing", (req: any, res, next) => {
       throw new NotFoundException("Quest not found");
     }
 
-    room.createNewSentenceQuest(user, req.body.drawing);
+    room.createNewQuest(QuestType.Sentence, user, req.body.drawing);
     quest.isCompleted = true;
     quest.setContent(req.body.drawing);
     if (room.isAllQuestsCompleted()) {

@@ -75,20 +75,19 @@ export class Room {
     return this.getPreviousTurn().quests.every((q) => q.isCompleted);
   }
 
-  createNewSentenceQuest(owner: Player, content: []) {
-    this.getCurrentTurn().quests.push(
-      new Quest(
-        QuestType.Sentence,
-        owner,
-        this.getNextPlayer(owner.id),
-        content
-      )
+  createNewQuest(type: QuestType, owner: Player, content: string | []) {
+    const quest = this.getCurrentTurn().quests.find(
+      (q) => q.owner.id === owner.id
     );
-  }
 
-  createNewDrawingQuest(owner: Player, content: string) {
+    // if quest already exist just update content
+    if (quest) {
+      quest.content = content;
+      return;
+    }
+
     this.getCurrentTurn().quests.push(
-      new Quest(QuestType.Drawing, owner, this.getNextPlayer(owner.id), content)
+      new Quest(type, owner, this.getNextPlayer(owner.id), content)
     );
   }
 
