@@ -11,6 +11,7 @@ import { session } from "./middlewares/session.js";
 import bodyParser from "body-parser";
 import { socketIO } from "./middlewares/socketIO.js";
 import { connectMongo } from "./helpers/mongo.js";
+import GameCleanupJob from "./helpers/gameCleanupJob.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -51,6 +52,7 @@ app.get("/", (req, res) => {
 app.use("/authentication", authenticationRouter);
 app.use("/room", roomRouter);
 app.use(exception);
+GameCleanupJob.Add();
 
 server.listen(process.env.PORT, () => {
   console.log(`Listening on port ${process.env.PORT}`);

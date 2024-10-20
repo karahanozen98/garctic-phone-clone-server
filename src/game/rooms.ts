@@ -13,6 +13,7 @@ export class Room {
   currentTurn: number;
   status: GameStatus;
   turns: Turn[];
+  createdAt: number;
 
   constructor(
     id: number,
@@ -21,6 +22,7 @@ export class Room {
     numberOfTurns: number
   ) {
     this.id = id;
+    this.createdAt = Date.now();
     this.owner = owner;
     this.players = [owner];
     this.isStarted = false;

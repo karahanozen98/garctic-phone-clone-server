@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { AuthorizationException } from "../exceptions/authorizationException";
+import { AuthorizationException } from "../exceptions/authorizationException.js";
 
 export const authorize =
   () => (req: any, res: Response, next: NextFunction) => {
