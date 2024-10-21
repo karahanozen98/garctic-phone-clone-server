@@ -6,6 +6,7 @@ export const exception = (
   res: Response,
   next: NextFunction
 ) => {
+  console.error(error);
   res.status(error.statusCode || 400).json({
     isSuccess: false,
     result: error.message,

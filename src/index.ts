@@ -23,12 +23,6 @@ connectMongo();
 io.on("connection", (socket: Socket) => {
   console.log("A user is connected");
 
-  socket.on("draw", (data: any) => {
-    console.log("Drawing received", data);
-
-    io.emit("painting", data);
-  });
-
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
   });
