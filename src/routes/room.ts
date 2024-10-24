@@ -74,11 +74,8 @@ router.get("/:id/getMyQuest", (req: any, res, next) => {
     if (!room) {
       throw new Error("No such room exists");
     }
-    const currentTurn = room.getPreviousTurn();
-    const quest = currentTurn.quests.find(
-      (quest) => quest.assignee.id === user.id
-    );
 
+    const quest = room.getLatestQuest(user.id);
     if (!quest) {
       throw new NotFoundException("No quest found for this user");
     }
@@ -152,12 +149,16 @@ router.put("/:id/sentence", (req: any, res, next) => {
       throw new Error("Game does not expect for sentences");
     }
 
-    room.createNewQuest(QuestType.Drawing, user, req.body.sentence);
+    room.createNewQuest(QuestType.Drawing, user.id, req.body.sentence);
 
     // all users entered their quests change room state
     if (room.isAllQuestsReady()) {
       room.completeCurrentTurn();
       req.io.emit(`room-update-${req.params.id}`, { room: new RoomDto(room) });
+    } else {
+      req.io.emit(`player-update-${req.params.id}`, {
+        players: room.players,
+      });
     }
 
     res.json();
@@ -193,13 +194,16 @@ router.put("/:id/drawing", (req: any, res, next) => {
       throw new NotFoundException("Quest not found");
     }
 
-    room.createNewQuest(QuestType.Sentence, user, req.body.drawing);
-    quest.isCompleted = true;
-    quest.setContent(req.body.drawing);
-    if (room.isAllQuestsCompleted()) {
+    room.createNewQuest(QuestType.Sentence, user.id, req.body.drawing);
+
+    if (room.isAllQuestsReady()) {
       // all users completed their drawing quests
       room.completeCurrentTurn();
       req.io.emit(`room-update-${req.params.id}`, { room: new RoomDto(room) });
+    } else {
+      req.io.emit(`player-update-${req.params.id}`, {
+        players: room.players,
+      });
     }
 
     res.json();

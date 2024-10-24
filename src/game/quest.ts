@@ -9,12 +9,14 @@ export class Quest {
   assignee: Player;
   content: string | [];
   isCompleted: boolean = false;
+  parentQuestId: string | undefined;
 
   constructor(
     type: QuestType,
     owner: Player,
     assignee: Player,
-    content: string | []
+    content: string | [],
+    parentQuestId?: string
   ) {
     if (owner.id === assignee.id) {
       throw new Error(
@@ -27,6 +29,7 @@ export class Quest {
     this.owner = owner;
     this.assignee = assignee;
     this.content = content;
+    this.parentQuestId = parentQuestId;
   }
 
   setContent(content: string) {

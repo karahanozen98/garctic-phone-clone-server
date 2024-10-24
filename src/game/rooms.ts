@@ -30,7 +30,8 @@ export class Room {
     this.numberOfTurns = numberOfTurns;
     this.currentTurn = 0;
     this.status = GameStatus.WaitingForStart;
-    this.turns = new Array(numberOfTurns).fill(0).map(() => new Turn());
+    // TODO add game finish case
+    this.turns = new Array(100).fill(0).map(() => new Turn());
   }
 
   isWaitingForSentences(): boolean {
@@ -71,13 +72,9 @@ export class Room {
     );
   }
 
-  isAllQuestsCompleted() {
-    return this.getPreviousTurn().quests.every((q) => q.isCompleted);
-  }
-
-  createNewQuest(type: QuestType, owner: Player, content: string | []) {
+  createNewQuest(type: QuestType, ownerId: string, content: string | []) {
     const quest = this.getCurrentTurn().quests.find(
-      (q) => q.owner.id === owner.id
+      (q) => q.owner.id === ownerId
     );
 
     // if quest already exist just update content
@@ -85,29 +82,53 @@ export class Room {
       quest.content = content;
       return;
     }
+    const parentQuest = this.getLatestQuest(ownerId);
 
+    if (parentQuest) {
+      parentQuest.isCompleted = true;
+    }
+    const owner = this.players.find((p) => p.id === ownerId);
     this.getCurrentTurn().quests.push(
-      new Quest(type, owner, this.getNextPlayer(owner.id), content)
+      new Quest(
+        type,
+        owner,
+        this.getNextPlayer(owner.id),
+        content,
+        parentQuest?.id
+      )
     );
+    owner.isReady = true;
   }
 
   completeCurrentTurn() {
+    ++this.currentTurn;
+    this.players.forEach((p) => (p.isReady = false));
     switch (this.status) {
       case GameStatus.WaitingForInitialSentences:
         this.status = GameStatus.WaitingForDrawings;
-        ++this.currentTurn;
         break;
       case GameStatus.WaitingForSentences:
         this.status = GameStatus.WaitingForDrawings;
-        ++this.currentTurn;
         break;
       case GameStatus.WaitingForDrawings:
         this.status = GameStatus.WaitingForSentences;
-        ++this.currentTurn;
         break;
       default:
         break;
     }
+  }
+
+  getLatestQuest(playerId: string): Quest | null {
+    if (this.currentTurn <= 0) {
+      return null;
+    }
+
+    const previousTurn = this.getPreviousTurn();
+    const quest = previousTurn.quests.find(
+      (quest) => quest.assignee.id === playerId
+    );
+
+    return quest;
   }
 }
 
