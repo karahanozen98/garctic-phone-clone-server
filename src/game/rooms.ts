@@ -14,6 +14,7 @@ export class Room {
   status: GameStatus;
   turns: Turn[];
   createdAt: number;
+  private shuffledPlayers: Player[];
 
   constructor(
     id: number,
@@ -32,6 +33,12 @@ export class Room {
     this.status = GameStatus.WaitingForStart;
     // TODO add game finish case
     this.turns = new Array(100).fill(0).map(() => new Turn());
+  }
+
+  startGame() {
+    this.isStarted = true;
+    this.status = GameStatus.WaitingForInitialSentences;
+    this.shufflePlayers();
   }
 
   isWaitingForSentences(): boolean {
@@ -56,12 +63,13 @@ export class Room {
     return this.turns[this.currentTurn];
   }
 
-  getNextPlayer(id: string) {
-    const index = this.players.findIndex((p) => p.id === id);
-    if (index + 1 === this.players.length) {
-      return this.players[0];
+  getRandomPlayer(id: string) {
+    const index = this.shuffledPlayers.findIndex((p) => p.id === id);
+    if (index + 1 === this.shuffledPlayers.length) {
+      return this.shuffledPlayers[0];
     }
-    return this.players[index + 1];
+
+    return this.shuffledPlayers[index + 1];
   }
 
   isAllQuestsReady() {
@@ -72,7 +80,7 @@ export class Room {
     );
   }
 
-  createNewQuest(type: QuestType, ownerId: string, content: string | []) {
+  createNewQuest(type: QuestType, ownerId: string, content: string | any[]) {
     const quest = this.getCurrentTurn().quests.find(
       (q) => q.owner.id === ownerId
     );
@@ -92,7 +100,7 @@ export class Room {
       new Quest(
         type,
         owner,
-        this.getNextPlayer(owner.id),
+        this.getRandomPlayer(owner.id),
         content,
         parentQuest?.id
       )
@@ -103,6 +111,7 @@ export class Room {
   completeCurrentTurn() {
     ++this.currentTurn;
     this.players.forEach((p) => (p.isReady = false));
+    this.shufflePlayers();
     switch (this.status) {
       case GameStatus.WaitingForInitialSentences:
         this.status = GameStatus.WaitingForDrawings;
@@ -129,6 +138,26 @@ export class Room {
     );
 
     return quest;
+  }
+
+  private shufflePlayers() {
+    const copyArr = [...this.players];
+    let currentIndex = this.players.length;
+
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+      // Pick a remaining element...
+      let randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      // And swap it with the current element.
+      [copyArr[currentIndex], copyArr[randomIndex]] = [
+        copyArr[randomIndex],
+        copyArr[currentIndex],
+      ];
+    }
+
+    this.shuffledPlayers = copyArr;
   }
 }
 

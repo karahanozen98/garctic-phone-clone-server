@@ -7,7 +7,7 @@ export class Quest {
   type: QuestType;
   owner: Player;
   assignee: Player;
-  content: string | [];
+  content: string | any[];
   isCompleted: boolean = false;
   parentQuestId: string | undefined;
 
@@ -15,7 +15,7 @@ export class Quest {
     type: QuestType,
     owner: Player,
     assignee: Player,
-    content: string | [],
+    content: string | any[],
     parentQuestId?: string
   ) {
     if (owner.id === assignee.id) {
@@ -30,10 +30,5 @@ export class Quest {
     this.assignee = assignee;
     this.content = content;
     this.parentQuestId = parentQuestId;
-  }
-
-  setContent(content: string) {
-    this.content = content;
-    this.isCompleted = true;
   }
 }
