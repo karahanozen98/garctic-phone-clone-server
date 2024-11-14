@@ -1,6 +1,7 @@
 import { GameStatus, QuestType } from "./enums/index.js";
 import { Player } from "./player.js";
 import { Quest } from "./quest.js";
+import ShowcaseItem from "./showcase.js";
 import { Turn } from "./turn.js";
 
 export class Room {
@@ -15,6 +16,9 @@ export class Room {
   turns: Turn[];
   createdAt: number;
   private shuffledPlayers: Player[];
+  private showCaseTurn = 0;
+  private showCaseUserIndex = 0;
+  private showcase: ShowcaseItem[] = [];
 
   constructor(
     id: number,
@@ -31,14 +35,21 @@ export class Room {
     this.numberOfTurns = numberOfTurns;
     this.currentTurn = 0;
     this.status = GameStatus.WaitingForStart;
-    // TODO add game finish case
-    this.turns = new Array(100).fill(0).map(() => new Turn());
+    this.turns = new Array(numberOfTurns).fill(0).map(() => new Turn());
   }
 
   startGame() {
     this.isStarted = true;
     this.status = GameStatus.WaitingForInitialSentences;
     this.shufflePlayers();
+  }
+
+  startShowcase() {
+    this.status = GameStatus.DrawingShowcase;
+  }
+
+  finishGame() {
+    this.status = GameStatus.Finished;
   }
 
   isWaitingForSentences(): boolean {
@@ -50,6 +61,14 @@ export class Room {
 
   isFirstTurn(): boolean {
     return this.currentTurn === 0;
+  }
+
+  isLastTurn(): boolean {
+    return this.currentTurn === this.numberOfTurns - 1;
+  }
+
+  isGameFinished(): boolean {
+    return this.status === GameStatus.Finished;
   }
 
   getPreviousTurn() {
@@ -138,6 +157,45 @@ export class Room {
     );
 
     return quest;
+  }
+
+  getShowCase(): ShowcaseItem[] {
+    if (this.showCaseTurn === 0 && this.showcase.length <= 0) {
+      const quest = this.turns[this.showCaseTurn].quests.find(
+        (quest) => quest.owner.id === this.players[this.showCaseUserIndex].id
+      );
+
+      this.showcase.push(new ShowcaseItem(quest));
+      return this.showcase;
+    }
+
+    return this.showcase;
+  }
+
+  moveToNextShowcase(): ShowcaseItem[] {
+    const lastShowcaseItem = this.showcase.at(this.showcase.length - 1);
+    const isLastTurn = this.showCaseTurn === this.numberOfTurns - 1;
+    const isLastPlayer = this.showCaseUserIndex === this.players.length - 1;
+
+    if (isLastTurn && isLastPlayer) {
+      this.finishGame();
+      return this.showcase;
+    }
+
+    // move to next player's showcase
+    if (isLastTurn) {
+      this.showcase = [];
+      ++this.showCaseUserIndex;
+      this.showCaseTurn = 0;
+      return this.getShowCase();
+    }
+
+    ++this.showCaseTurn;
+    const quest = this.turns[this.showCaseTurn].quests.find(
+      (q) => q.parentQuestId === lastShowcaseItem.id
+    );
+    this.showcase.push(new ShowcaseItem(quest));
+    return this.showcase;
   }
 
   private shufflePlayers() {

@@ -4,13 +4,14 @@ import { Player } from "../src/game/player.js";
 import { GameStatus } from "../src/game/enums/index.js";
 import { expect } from "chai";
 import chaiAsPromised from "chai-as-promised";
+import { ISocketIO } from "index.js";
+import type { Room } from "../src/game/rooms.js";
 chai.use(chaiAsPromised);
 
 const players = [
   new Player("1", "John"),
   new Player("2", "Jane"),
   new Player("3", "Jax"),
-  new Player("3", "Jack"),
 ];
 
 const ioMock = {
@@ -18,21 +19,25 @@ const ioMock = {
 };
 
 const initGame = async () => {
-  const gameRoom = await roomService.create(players[0], 10, 10);
+  const gameRoom = await roomService.create(players[0], 10, 3);
   await roomService.join(players[1], gameRoom.id.toString(), ioMock);
   await roomService.join(players[2], gameRoom.id.toString(), ioMock);
 
   return gameRoom;
 };
 
-describe("create new game", async () => {
-  const gameRoom = await roomService.create(players[0], 10, 10);
+describe("Test pre-start game state", () => {
+  let gameRoom: Room = null;
 
-  it("is started should be false", () => {
+  before(async () => {
+    gameRoom = await roomService.create(players[0], 10, 3);
+  });
+
+  it("is started should be false", async () => {
     expect(gameRoom.isStarted).to.equals(false);
   });
 
-  it("game shouldn't be ready", () => {
+  it("game shouldn't be ready", async () => {
     expect(gameRoom.isAllQuestsReady()).to.be.equals(false);
   });
 });
@@ -95,7 +100,7 @@ describe("Test basic game initializations and verifications", () => {
 });
 
 //#region Game flow tests for 1 player
-describe("Gameflow test for 1 player", () => {
+describe("Test game flow for 1 player", () => {
   it("should prevent game starting ", async () => {
     const gameRoom = await roomService.create(players[0], 10, 10);
     return expect(
@@ -108,7 +113,7 @@ describe("Gameflow test for 1 player", () => {
 //#endregion
 
 //#region Game flow tests for 2 players
-describe("Gameflow test for 2 player", () => {
+describe("Test game flow for 2 player", () => {
   it("should start the game ", async () => {
     const gameRoom = await roomService.create(players[0], 10, 10);
     await roomService.join(players[1], gameRoom.id.toString(), ioMock);
@@ -155,12 +160,14 @@ describe("Gameflow test for 2 player", () => {
 
 //#region  Game Flow tests for 3 players
 describe("Gameflow tests for 3 players", () => {
-  it("should be able to play", async () => {
-    const gameRoom = await initGame();
-    await roomService.start(players[0].id, gameRoom.id.toString(), ioMock);
-    expect(gameRoom.isStarted).to.be.equal(true);
-    expect(gameRoom.status).to.be.equal(GameStatus.WaitingForInitialSentences);
+  let gameRoom: Room;
 
+  before(async () => {
+    gameRoom = await initGame();
+    await roomService.start(players[0].id, gameRoom.id.toString(), ioMock);
+  });
+
+  it("should be able to play", async () => {
     await roomService.postSentence(
       gameRoom.players[0].id,
       gameRoom.id.toString(),
@@ -269,3 +276,81 @@ describe("Gameflow tests for 3 players", () => {
   });
 });
 //#endregion
+
+describe("Test after-game showcase for 3 players", () => {
+  it("should start showcase", async () => {
+    const gameRoom = await initGame();
+    const params: [string, string, ISocketIO] = [
+      players[0].id,
+      gameRoom.id.toString(),
+      ioMock,
+    ];
+    await roomService.start(players[0].id, gameRoom.id.toString(), ioMock);
+
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < gameRoom.players.length; j++) {
+        if (i % 2 === 0) {
+          await roomService.postSentence(
+            gameRoom.players[j].id,
+            gameRoom.id.toString(),
+            `Sample sentence by player ${j + 1}`,
+            ioMock
+          );
+        } else {
+          await roomService.postDrawing(
+            gameRoom.players[j].id,
+            gameRoom.id.toString(),
+            [`Sample drawing by player ${j + 1}`],
+            ioMock
+          );
+        }
+      }
+    }
+
+    expect(gameRoom.status).to.be.equal(GameStatus.DrawingShowcase);
+    await expect(roomService.getShowcase(...params))
+      .to.eventually.is.an("array")
+      .with.length(1)
+      .and.to.have.nested.property(
+        "[0].content",
+        "Sample sentence by player 1"
+      );
+    await expect(roomService.moveToNextShowcase(...params)).to.eventually
+      .fulfilled;
+
+    const showcase = await roomService.getShowcase(...params);
+    expect(showcase).to.be.an("array").with.length(2);
+    expect(showcase[1].content).to.be.deep.oneOf([
+      ["Sample drawing by player 2"],
+      ["Sample drawing by player 3"],
+    ]);
+
+    await expect(roomService.moveToNextShowcase(...params))
+      .to.eventually.be.an("array")
+      .with.length(3);
+
+    await expect(roomService.moveToNextShowcase(...params))
+      .to.eventually.be.an("array")
+      .with.length(1)
+      .and.to.have.nested.property(
+        "[0].content",
+        "Sample sentence by player 2"
+      );
+
+    await expect(roomService.moveToNextShowcase(...params))
+      .to.eventually.be.an("array")
+      .with.length(2);
+
+    await expect(roomService.moveToNextShowcase(...params))
+      .to.eventually.be.an("array")
+      .with.length(3);
+
+    await expect(roomService.moveToNextShowcase(...params))
+      .to.eventually.be.an("array")
+      .with.length(1)
+      .and.to.have.nested.property(
+        "[0].content",
+        "Sample sentence by player 3"
+      );
+  });
+});

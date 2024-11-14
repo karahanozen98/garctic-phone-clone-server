@@ -12,5 +12,7 @@ router.put("/:id/join", roomController.join);
 router.put("/:id/start", roomController.start);
 router.put("/:id/sentence", roomController.postSentence);
 router.put("/:id/drawing", roomController.postDrawing);
+router.get("/:id/getShowcase", roomController.getShowcase);
+router.put("/:id/moveToNextShowcase", roomController.moveToNextShowcase);
 
 export default router;

@@ -3,6 +3,8 @@ export enum GameStatus {
   WaitingForInitialSentences,
   WaitingForDrawings,
   WaitingForSentences,
+  DrawingShowcase,
+  Finished,
 }
 
 export enum EntryType {

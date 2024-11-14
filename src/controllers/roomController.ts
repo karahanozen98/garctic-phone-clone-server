@@ -132,3 +132,37 @@ export const postDrawing = async (
     next(error);
   }
 };
+
+export const getShowcase = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const showcase = await roomService.getShowcase(
+      req.session.user.id,
+      req.params.id,
+      req.io
+    );
+    res.json(showcase);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const moveToNextShowcase = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const showcase = await roomService.moveToNextShowcase(
+      req.session.user.id,
+      req.params.id,
+      req.io
+    );
+    res.json(showcase);
+  } catch (error) {
+    next(error);
+  }
+};

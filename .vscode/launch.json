@@ -9,6 +9,19 @@
       "program": "${workspaceFolder}/src/index.ts", // Adjust if your entry file is different
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "tsc: build - tsconfig.json"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Mocha Tests",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "args": [
+        "${workspaceFolder}/out/test/**/*.js"  // Adjust this path if your tests are in a different location
+      ],
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "preLaunchTask": "tsc: build - tsconfig.json"
     }
   ]
 }

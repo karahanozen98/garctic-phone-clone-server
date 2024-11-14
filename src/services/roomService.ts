@@ -121,7 +121,7 @@ export const postSentence = async (
 
   // all users entered their quests change room state
   if (room.isAllQuestsReady()) {
-    room.completeCurrentTurn();
+    room.isLastTurn() ? room.startShowcase() : room.completeCurrentTurn();
     io.emit(`room-update-${roomId}`, { room: new RoomDto(room) });
   } else {
     io.emit(`player-update-${roomId}`, {
@@ -155,11 +155,55 @@ export const postDrawing = async (
 
   if (room.isAllQuestsReady()) {
     // all users completed their drawing quests
-    room.completeCurrentTurn();
+    room.isLastTurn() ? room.startShowcase() : room.completeCurrentTurn();
     io.emit(`room-update-${roomId}`, { room: new RoomDto(room) });
   } else {
     io.emit(`player-update-${roomId}`, {
       players: room.players,
     });
   }
+};
+
+export const getShowcase = async (
+  userId: string,
+  roomId: string,
+  io: ISocketIO
+) => {
+  const room = rooms.find(
+    (room) =>
+      String(room.id) === roomId &&
+      room.players.some((player) => player.id === userId)
+  );
+
+  if (!room) {
+    throw new Error("No such room exists");
+  }
+
+  return room.getShowCase();
+};
+
+export const moveToNextShowcase = async (
+  userId: string,
+  roomId: string,
+  io: ISocketIO
+) => {
+  const room = rooms.find(
+    (room) =>
+      String(room.id) === roomId &&
+      room.players.some((player) => player.id === userId)
+  );
+
+  if (!room) {
+    throw new Error("No such room exists");
+  }
+
+  const showcase = room.moveToNextShowcase();
+
+  if (room.isGameFinished()) {
+    io.emit(`room-update-${roomId}`, { room: new RoomDto(room) });
+    return showcase;
+  }
+
+  io.emit("showcase-update", { showcase });
+  return showcase;
 };
