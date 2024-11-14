@@ -22,4 +22,4 @@ RUN npm ci --only=production
 
 COPY --from=build /app/out ./out
 
-CMD ["node", "out/index.js"]
+CMD ["node", "out/src/index.js"]
