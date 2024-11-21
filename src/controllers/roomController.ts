@@ -141,8 +141,7 @@ export const getShowcase = async (
   try {
     const showcase = await roomService.getShowcase(
       req.session.user.id,
-      req.params.id,
-      req.io
+      req.params.id
     );
     res.json(showcase);
   } catch (error) {

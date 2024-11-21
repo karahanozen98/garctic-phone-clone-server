@@ -4,7 +4,6 @@ import { Player } from "../src/game/player.js";
 import { GameStatus } from "../src/game/enums/index.js";
 import { expect } from "chai";
 import chaiAsPromised from "chai-as-promised";
-import { ISocketIO } from "index.js";
 import type { Room } from "../src/game/rooms.js";
 chai.use(chaiAsPromised);
 
@@ -280,12 +279,9 @@ describe("Gameflow tests for 3 players", () => {
 describe("Test after-game showcase for 3 players", () => {
   it("should start showcase", async () => {
     const gameRoom = await initGame();
-    const params: [string, string, ISocketIO] = [
-      players[0].id,
-      gameRoom.id.toString(),
-      ioMock,
-    ];
-    await roomService.start(players[0].id, gameRoom.id.toString(), ioMock);
+    const playerId = players[0].id;
+    const gameId = gameRoom.id.toString();
+    await roomService.start(playerId, gameId, ioMock);
 
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < gameRoom.players.length; j++) {
@@ -308,28 +304,28 @@ describe("Test after-game showcase for 3 players", () => {
     }
 
     expect(gameRoom.status).to.be.equal(GameStatus.DrawingShowcase);
-    await expect(roomService.getShowcase(...params))
+    await expect(roomService.getShowcase(playerId, gameId))
       .to.eventually.is.an("array")
       .with.length(1)
       .and.to.have.nested.property(
         "[0].content",
         "Sample sentence by player 1"
       );
-    await expect(roomService.moveToNextShowcase(...params)).to.eventually
-      .fulfilled;
+    await expect(roomService.moveToNextShowcase(playerId, gameId, ioMock)).to
+      .eventually.fulfilled;
 
-    const showcase = await roomService.getShowcase(...params);
+    const showcase = await roomService.getShowcase(playerId, gameId);
     expect(showcase).to.be.an("array").with.length(2);
     expect(showcase[1].content).to.be.deep.oneOf([
       ["Sample drawing by player 2"],
       ["Sample drawing by player 3"],
     ]);
 
-    await expect(roomService.moveToNextShowcase(...params))
+    await expect(roomService.moveToNextShowcase(playerId, gameId, ioMock))
       .to.eventually.be.an("array")
       .with.length(3);
 
-    await expect(roomService.moveToNextShowcase(...params))
+    await expect(roomService.moveToNextShowcase(playerId, gameId, ioMock))
       .to.eventually.be.an("array")
       .with.length(1)
       .and.to.have.nested.property(
@@ -337,15 +333,15 @@ describe("Test after-game showcase for 3 players", () => {
         "Sample sentence by player 2"
       );
 
-    await expect(roomService.moveToNextShowcase(...params))
+    await expect(roomService.moveToNextShowcase(playerId, gameId, ioMock))
       .to.eventually.be.an("array")
       .with.length(2);
 
-    await expect(roomService.moveToNextShowcase(...params))
+    await expect(roomService.moveToNextShowcase(playerId, gameId, ioMock))
       .to.eventually.be.an("array")
       .with.length(3);
 
-    await expect(roomService.moveToNextShowcase(...params))
+    await expect(roomService.moveToNextShowcase(playerId, gameId, ioMock))
       .to.eventually.be.an("array")
       .with.length(1)
       .and.to.have.nested.property(

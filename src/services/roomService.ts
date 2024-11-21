@@ -53,7 +53,7 @@ export const getMyQuest = async (userId: string, roomId: string) => {
   );
 
   if (!room) {
-    throw new Error("No such room exists");
+    throw new NotFoundException("Room Not Found");
   }
 
   const quest = room.getLatestQuest(userId);
@@ -68,7 +68,7 @@ export const join = async (user: Player, roomId: string, io: ISocketIO) => {
   const room = rooms.find((room) => String(room.id) === roomId);
 
   if (!room) {
-    throw new Error("No such room exists");
+    throw new NotFoundException("Room Not Found");
   }
 
   if (room.players.find((u) => u.id === user.id) == null) {
@@ -81,7 +81,7 @@ export const start = async (userId: string, roomId: string, io: ISocketIO) => {
   const room = rooms.find((room) => String(room.id) === roomId);
 
   if (!room) {
-    throw new Error("No such room exists");
+    throw new NotFoundException("Room Not Found");
   }
 
   if (room.owner.id !== userId) {
@@ -109,7 +109,7 @@ export const postSentence = async (
   );
 
   if (!room) {
-    throw new Error("No such room exists");
+    throw new NotFoundException("Room Not Found");
   }
 
   if (!room.isWaitingForSentences()) {
@@ -143,7 +143,7 @@ export const postDrawing = async (
   );
 
   if (!room) {
-    throw new Error("No such room exists");
+    throw new NotFoundException("Room Not Found");
   }
 
   if (room.status !== GameStatus.WaitingForDrawings) {
@@ -164,11 +164,7 @@ export const postDrawing = async (
   }
 };
 
-export const getShowcase = async (
-  userId: string,
-  roomId: string,
-  io: ISocketIO
-) => {
+export const getShowcase = async (userId: string, roomId: string) => {
   const room = rooms.find(
     (room) =>
       String(room.id) === roomId &&
@@ -176,7 +172,7 @@ export const getShowcase = async (
   );
 
   if (!room) {
-    throw new Error("No such room exists");
+    throw new NotFoundException("Room Not Found");
   }
 
   return room.getShowCase();
@@ -194,7 +190,7 @@ export const moveToNextShowcase = async (
   );
 
   if (!room) {
-    throw new Error("No such room exists");
+    throw new NotFoundException("Room Not Found");
   }
 
   const showcase = room.moveToNextShowcase();
